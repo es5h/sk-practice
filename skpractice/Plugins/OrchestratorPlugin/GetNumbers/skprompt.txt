@@ -1,0 +1,14 @@
+JSON Format으로 숫자를 추출해줘
+
+-------------------
+INPUT: 4의 루트는?
+OUTPUT: { "number1": 4 }
+
+INPUT: 300원에서 200원을 빼면?
+OUTPUT: { "number1": 300, "number2": 200 }
+
+INPUT: 길이가 3cm인 2x4 를 갖고 있다. 이것을 절반으로 자르면?
+OUTPUT: { "number1": 3, "number2": 2 }
+
+INPUT: {{$input}}
+OUTPUT:    
