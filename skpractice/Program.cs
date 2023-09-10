@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.Skills.Core;
 using skpractice.Plugins.OrchestratorPlugin;
 
@@ -34,10 +35,16 @@ var mathPlugin = kernel.ImportSkill(new skpractice.Plugins.MathPlugin.Math(), "M
 var orchestratorPlugin = kernel.ImportSkill(new Orchestrator(kernel), "OrchestratorPlugin");
 var conversationSummaryPlugin = kernel.ImportSkill(new ConversationSummarySkill(kernel), "ConversationSummarySkill");
 
-// Make a request that runs the Sqrt function
-var result1 = await kernel.RunAsync("What is the square root of 524?", orchestratorPlugin["RouteRequest"]);
-Console.WriteLine(result1);
+var planner = new SequentialPlanner(kernel);
 
-// Make a request that runs the Add function
-var result2 = await kernel.RunAsync("How many square feet would the room be if its length was 12.25 feet and its width was 17.33 feet?", orchestratorPlugin["RouteRequest"]);
-Console.WriteLine(result2);
+// Create a plan for the ask
+var ask = "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?";
+var plan = await planner.CreatePlanAsync(ask);
+Console.WriteLine(plan.ToJson(true));
+
+// Execute the plan
+var result = await plan.InvokeAsync();
+
+Console.WriteLine("Plan results:");
+Console.WriteLine(result.Result);
+
