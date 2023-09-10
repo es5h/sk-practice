@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sk-practice", "sk-practice\sk-practice.csproj", "{584B25D0-FF11-4E02-A233-B219FD5AD33E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "skpractice", "skpractice\skpractice.csproj", "{584B25D0-FF11-4E02-A233-B219FD5AD33E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
