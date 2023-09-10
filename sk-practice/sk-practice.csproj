@@ -24,6 +24,12 @@
         <DependentUpon>appsettings.json</DependentUpon>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Plugins\OrchestratorPlugin\GetIntent\config.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Plugins\OrchestratorPlugin\GetIntent\skprompt.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 

@@ -26,53 +26,14 @@ var kernel = Kernel.Builder
     )
     .Build();
 
-const string prompt = """
-                      Bot: 어떻게 도와드릴까요?
-                      User: {{$input}}
+var pluginsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "plugins");
 
-                      ---------------------------------------
-
-                      5글자 이내로 표현한 사용자의 의도:
-                      """;
-
-var promptConfig = new PromptTemplateConfig
-{
-    Schema = 1,
-    Type = "Completion",
-    Description = "User의 의도를 가져온다.",
-    Completion =
-    {
-        MaxTokens = 500,
-        Temperature = 0.0,
-        TopP = 0.0,
-        PresencePenalty = 0.0,
-        FrequencyPenalty = 0.0,
-    },
-    Input =
-    {
-        Parameters = new List<InputParameter>
-        {
-            new()
-            {
-                Name = "input",
-                Description = "User의 요구",
-                DefaultValue = "",
-            }
-        }
-    },
-};
-
-var promptTemplate = new PromptTemplate(
-    prompt,
-    promptConfig,
-    kernel
-);
-var functionConfig = new SemanticFunctionConfig(promptConfig, promptTemplate);
-var getIntentFunction = kernel.RegisterSemanticFunction("OrchestratorPlugin", "GetIntent", functionConfig);
+var orchestratorPlugin = kernel
+    .ImportSemanticSkillFromDirectory(pluginsDirectory, "OrchestratorPlugin");
 
 var result = await kernel.RunAsync(
     "es5h github의 sk-practice 에 pr을 날린다.",
-    getIntentFunction
+    orchestratorPlugin["GetIntent"]
 );
 
 Console.WriteLine(result);
