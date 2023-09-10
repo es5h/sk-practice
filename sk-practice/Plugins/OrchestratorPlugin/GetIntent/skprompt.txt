@@ -1,6 +1,9 @@
-Bot: 어떻게 도와드릴까요?
+{{ConversationSummarySkill.SummarizeConversation $history}}
+
 User: {{$input}}
 
----------------------------------------
+------------------------------
 
-User의 의도를 5단어 이하로 설명
+User의 의도를 알려줘. 의도는 다음 중 하나에서만 나와야한다. {{$options}}
+
+의도: 

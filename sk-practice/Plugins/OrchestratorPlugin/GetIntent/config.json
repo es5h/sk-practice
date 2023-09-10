@@ -14,7 +14,17 @@
       {
         "name": "input",
         "description": "User의 요구",
-        "default_value": ""
+        "defaultValue": ""
+      },
+      {
+        "name": "history",
+        "description": "대화의 history",
+        "defaultValue": ""
+      },
+      {
+        "name": "options",
+        "description": "선택할 수 있는 옵션",
+        "defaultValue": ""
       }
     ]
   }
