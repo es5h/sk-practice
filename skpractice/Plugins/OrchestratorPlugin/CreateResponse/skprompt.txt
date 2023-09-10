@@ -1,0 +1,5 @@
+User 요청에 대한 답변은 다음과 같습니다: {{$input}}
+Bot은 User에게 답을 다시 제공해야 합니다.
+
+User: {{$original_request}}
+Bot:

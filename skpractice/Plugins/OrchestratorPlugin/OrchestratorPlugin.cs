@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.ComponentModel;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SkillDefinition;
+using Newtonsoft.Json.Linq;
 
 namespace skpractice.Plugins.OrchestratorPlugin;
 
@@ -15,7 +15,17 @@ public class Orchestrator
         _kernel = kernel;
     }
 
-    [SKFunction]
+    [SKFunction, Description("Json 으로 받은 숫자를 뽑아냅니다.")]
+    public SKContext ExtractNumbersFromJson(SKContext context)
+    {
+        var numbers = JObject.Parse(context.Variables["input"]);
+
+        numbers.Properties().ToList().ForEach(p => context.Variables[p.Name] = p.Value?.ToString());
+
+        return context;
+    }
+
+    [SKFunction, Description("요청을 받아서 어떤 스킬을 실행할지 결정합니다.")]
     public async Task<string> RouteRequestAsync(SKContext context)
     {
         var request = context.Variables["input"];
@@ -26,44 +36,34 @@ public class Orchestrator
             ["input"] = context.Variables["input"],
             ["options"] = "Sqrt, Multiply",
         };
+
         var intent = (await _kernel.RunAsync(getIntentVariables, getIntent)).Result.Trim();
 
+        var MathFunction = intent switch
+        {
+            "Sqrt" => _kernel.Skills.GetFunction("MathPlugin", "Sqrt"),
+            "Multiply" => _kernel.Skills.GetFunction("MathPlugin", "Multiply"),
+            _ => throw new InvalidOperationException($"Unknown intent: {intent}"),
+        };
+        
         var getNumbers = _kernel.Skills.GetFunction("OrchestratorPlugin", "GetNumbers");
-        var numbersJson = (await _kernel.RunAsync(context.Variables, getNumbers)).Result;
-        var numbers = JsonSerializer.Deserialize<NumberJson>(numbersJson);
+        var extractNumbersFromJson = _kernel.Skills.GetFunction("OrchestratorPlugin", "ExtractNumbersFromJson");
+        var createResponse = _kernel.Skills.GetFunction("OrchestratorPlugin", "CreateResponse");
 
-        return intent switch
+        var pipelineContext = new ContextVariables(request)
         {
-            "Sqrt" => await ExecuteMathFunctionAsync("MathPlugin", "Sqrt",
-                numbers!.Number1!.ToString() ?? string.Empty),
-            "Multiply" => await ExecuteMultiplyFunctionAsync(numbers!),
-            _ => "연산 불가",
+            ["original_request"] = request,
         };
-    }
 
-    private async Task<string> ExecuteMathFunctionAsync(string pluginName, string functionName, string input)
-    {
-        var function = _kernel.Skills.GetFunction(pluginName, functionName);
-        return (await _kernel.RunAsync(input, function)).Result;
-    }
+        var output = await _kernel.RunAsync
+        (
+            pipelineContext,
+            getNumbers,
+            extractNumbersFromJson,
+            MathFunction,
+            createResponse
+        );
 
-    private async Task<string> ExecuteMultiplyFunctionAsync(NumberJson numbers)
-    {
-        var multiply = _kernel.Skills.GetFunction("MathPlugin", "Multiply");
-        var multiplyVariables = new ContextVariables
-        {
-            ["number1"] = numbers!.Number1!.ToString() ?? string.Empty,
-            ["number2"] = numbers!.Number2!.ToString() ?? string.Empty
-        };
-        return (await _kernel.RunAsync(multiplyVariables, multiply)).Result;
-    }
-
-    private sealed record NumberJson
-    {
-        [JsonPropertyName("number1")]
-        public double? Number1 { get; init; }
-
-        [JsonPropertyName("number2")]
-        public double? Number2 { get; init; }
+        return output.Variables["input"];
     }
 }
